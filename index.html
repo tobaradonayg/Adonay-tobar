@@ -85,7 +85,7 @@
             <p id="authMessage" class="text-center text-sm text-red-500"></p>
         </div>
 
-        <!-- PANTALLA PRINCIPAL DE LA APLICACIÓN (OCULTA POR DEFECTO) -->
+        <!-- PANTALLA PRINCIPAL DE LA APLICACIÓN (OCULTA POR DEFEFCTO) -->
         <div id="mainApp" class="space-y-8 hidden">
             
             <!-- Botones de Perfil y Sesión -->
@@ -98,10 +98,10 @@
                 </button>
             </div>
 
-            <!-- CONTENEDOR PRINCIPAL: DIVIDIDO EN DOS COLUMNAS -->
+            <!-- NUEVA ESTRUCTURA: SECCIÓN SUPERIOR (Formulario y Mensaje) -->
             <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
 
-                <!-- COLUMNA IZQUIERDA (CLIENTES): 2/5 del ancho -->
+                <!-- Columna Izquierda (Clientes Form): 2/5 del ancho -->
                 <div class="lg:col-span-2 space-y-6">
                     <!-- GESTIÓN DE CONTACTOS (ADD / EDIT FORM) -->
                     <div class="bg-white p-6 rounded-2xl space-y-4 shadow-xl border border-gray-100 card">
@@ -142,45 +142,15 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- LISTA DE CLIENTES FILTRO Y BÚSQUEDA -->
-                    <div class="bg-white p-6 rounded-2xl space-y-4 shadow-xl border border-gray-100 card">
-                        <h2 class="text-2xl font-bold text-gray-800 flex items-center justify-between border-b pb-2">
-                            Tu Lista de Clientes
-                            <button onclick="clearAllContacts()" class="text-xs text-red-500 hover:text-red-700 font-semibold p-1 rounded-lg">
-                                Limpiar Mis Clientes
-                            </button>
-                        </h2>
-
-                        <div class="grid grid-cols-2 gap-3">
-                            <input type="text" id="searchClient" oninput="filterAndSearchContacts()" placeholder="Buscar por Nombre/Apellido..."
-                                class="p-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-sm" />
-                            <select id="filterCategory" onchange="filterAndSearchContacts()"
-                                class="p-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-sm appearance-none bg-white">
-                                <option value="all">Ver Todas</option>
-                                <option value="cartera">Cartera</option>
-                                <option value="top">Top Compradores</option>
-                                <option value="occasional">Ocasionales</option>
-                                <option value="recover">A Recuperar</option>
-                                <option value="project">Proyectos</option>
-                            </select>
-                        </div>
-
-                        <div id="contactList" class="h-80 overflow-y-auto bg-gray-50 border border-gray-300 rounded-xl text-sm">
-                            <!-- Los contactos filtrados se renderizan aquí -->
-                        </div>
-                        <p id="contactCount" class="text-xs text-gray-500 text-right font-medium"></p>
-                    </div>
                 </div>
 
-
-                <!-- COLUMNA DERECHA (MENSAJE): 3/5 del ancho -->
+                <!-- Columna Derecha (Mensaje): 3/5 del ancho -->
                 <div class="lg:col-span-3 space-y-6">
                     
                     <!-- DEFINIR MENSAJE Y ENVÍO -->
                     <div class="bg-white p-6 rounded-2xl space-y-4 shadow-xl border border-gray-100 card">
                         <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
-                            Definir Mensaje y Envío
+                            Definir Plantilla de Mensaje
                         </h2>
                         
                         <!-- Draggable placeholders -->
@@ -214,7 +184,41 @@
 
                 </div>
 
-            </div> <!-- END GRID -->
+            </div> <!-- END SECCIÓN SUPERIOR GRID -->
+            
+            <!-- SECCIÓN INFERIOR (LISTA DE CLIENTES) - FULL WIDTH -->
+            <div class="space-y-6">
+                 <!-- LISTA DE CLIENTES FILTRO Y BÚSQUEDA -->
+                 <div class="bg-white p-6 rounded-2xl space-y-4 shadow-xl border border-gray-100 card">
+                    <h2 class="text-2xl font-bold text-gray-800 flex items-center justify-between border-b pb-2">
+                        Tu Lista de Clientes (Datos Aislados)
+                        <button onclick="clearAllContacts()" class="text-xs text-red-500 hover:text-red-700 font-semibold p-1 rounded-lg">
+                            Limpiar Mis Clientes
+                        </button>
+                    </h2>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <input type="text" id="searchClient" oninput="filterAndSearchContacts()" placeholder="Buscar por Nombre/Apellido..."
+                            class="p-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-sm" />
+                        <select id="filterCategory" onchange="filterAndSearchContacts()"
+                            class="p-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-sm appearance-none bg-white">
+                            <option value="all">Ver Todas las Categorías</option>
+                            <option value="cartera">Cartera</option>
+                            <option value="top">Top Compradores</option>
+                            <option value="occasional">Ocasionales</option>
+                            <option value="recover">A Recuperar</option>
+                            <option value="project">Proyectos</option>
+                        </select>
+                    </div>
+
+                    <div id="contactList" class="h-80 overflow-y-auto bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                        <!-- Los contactos filtrados se renderizan aquí -->
+                    </div>
+                    <p id="contactCount" class="text-xs text-gray-500 text-right font-medium"></p>
+                </div>
+            </div>
+
+
         </div>
     </div>
 
@@ -222,12 +226,12 @@
         // --- CONSTANTES Y VARIABLES GLOBALES ---
         const LS_KEY_ACCOUNTS = 'waSenderAccounts'; 
         const LS_KEY_CURRENT_USER = 'waCurrentUser'; 
+        // CLAVE DE CONTACTOS PERSONALIZADA POR CORREO
         const LS_KEY_CONTACTS_PREFIX = 'waSenderContacts_'; 
-        // LÍMITE AUMENTADO A 200 CLIENTES POR USUARIO SEGÚN LA SOLICITUD
+        
         window.MAX_CONTACTS = 200;
         window.DOMAIN_REQUIRED = '@galvanissa.com';
         
-        // Usuarios predefinidos con el nuevo campo username
         const INITIAL_ACCOUNTS_DATA = {
             "usuario1@galvanissa.com": { email: "usuario1@galvanissa.com", password: "password1", username: "Gerente Ventas 1" },
             "usuario2@galvanissa.com": { email: "usuario2@galvanissa.com", password: "password2", username: "Asesor Cliente 2" }
@@ -245,9 +249,8 @@
         window.contacts = [];
         window.editingDocId = null; 
 
-        // --- UTILIDADES DE LOCAL STORAGE ---
+        // --- UTILIDADES DE LOCAL STORAGE (Mismo principio: clave única por correo) ---
 
-        // Cargar todas las cuentas (o inicializarlas si no existen)
         const getAccounts = () => {
             const json = localStorage.getItem(LS_KEY_ACCOUNTS);
             let accounts;
@@ -257,7 +260,6 @@
                 saveAccounts(accounts);
             } else {
                 accounts = JSON.parse(json);
-                // Lógica de compatibilidad para cuentas antiguas sin 'username'
                 Object.keys(accounts).forEach(email => {
                     if (!accounts[email].username) {
                          accounts[email].username = accounts[email].email.split('@')[0];
@@ -265,7 +267,6 @@
                 });
             }
             
-            // Imprimir CREDENCIALES COMPLETAS SOLO EN CONSOLA (SOLICITADO POR EL USUARIO)
             console.groupCollapsed('%c[CREDENTIALES DE ACCESO ACTIVAS (CORREO, CONTRASEÑA Y USUARIO)]', 'color: #1e3a8a; font-size: 14px; font-weight: bold; background-color: #f0f8ff; padding: 5px; border-radius: 4px;');
             Object.values(accounts).forEach(user => {
                 console.log(`Usuario: ${user.username} | Email: ${user.email} | Contraseña: ${user.password}`);
@@ -275,42 +276,41 @@
             return accounts;
         };
 
-        // Guardar todas las cuentas
         const saveAccounts = (accounts) => {
             localStorage.setItem(LS_KEY_ACCOUNTS, JSON.stringify(accounts));
-            // Aseguramos que la consola muestre siempre la lista de credenciales actualizadas
             getAccounts(); 
         };
         
-        // Obtener la clave de contactos específica para el usuario
+        // Función CRÍTICA: Genera una clave única para cada usuario
         const getUserContactsKey = (email) => {
             return LS_KEY_CONTACTS_PREFIX + email.toLowerCase();
         };
         
-        // Cargar contactos del usuario actual
+        // Cargar contactos del usuario actual (usa la clave única)
         const loadContacts = () => {
             if (!window.currentUser) {
                 window.contacts = [];
                 return;
             }
+            // Usa el email del usuario logueado para generar la clave
             const key = getUserContactsKey(window.currentUser.email);
             const json = localStorage.getItem(key);
             const loadedContacts = json ? JSON.parse(json) : [];
             window.contacts = loadedContacts;
-            console.log(`[STATUS] Se cargaron ${window.contacts.length} clientes para ${window.currentUser.email}.`);
+            console.log(`%c[STATUS] Se cargaron ${window.contacts.length} clientes, ISOLADOS para ${window.currentUser.email} (Clave: ${key}).`, 'color: green;');
             window.filterAndSearchContacts();
         };
 
-        // Guardar contactos del usuario actual
+        // Guardar contactos del usuario actual (usa la clave única)
         const saveContacts = () => {
             if (!window.currentUser) return;
+            // Usa el email del usuario logueado para generar la clave
             const key = getUserContactsKey(window.currentUser.email);
             localStorage.setItem(key, JSON.stringify(window.contacts));
         };
         
-        // --- MANEJO DE MODALES ---
-        
-        // Función para alternar visibilidad de contraseña
+        // --- MANEJO DE MODALES Y AUTENTICACIÓN (Lógica consistente) ---
+
         window.togglePasswordVisibility = (passwordInputId, toggleButtonId) => {
             const passwordInput = document.getElementById(passwordInputId);
             const toggleButton = document.getElementById(toggleButtonId);
@@ -344,19 +344,18 @@
             
             modalConfirm.textContent = confirmText;
             
-            // CLASES EN LÍNEA
-            modalConfirm.classList.remove('bg-red-500', 'hover:bg-red-600', 'bg-[#1e3a8a]', 'hover:bg-[#1f377a]', 'bg-[#25D366]', 'hover:bg-[#128C7E]');
+            modalConfirm.classList.remove('bg-red-500', 'hover:bg-red-600', 'bg-[#1e3a8a]', 'hover:bg-[#1f377a]', 'bg-[#25D366]', 'hover:bg-[#128C7E]', 'bg-blue-600', 'hover:bg-blue-700');
+            modalCancel.classList.remove('hidden');
+
             if (isDestructive) {
                 modalConfirm.classList.add('bg-red-500', 'hover:bg-red-600');
             } else if (confirmText === 'Entendido') {
-                 // Use blue for informational messages
                 modalConfirm.classList.add('bg-blue-600', 'hover:bg-blue-700');
                 modalCancel.classList.add('hidden');
             } else {
                 modalConfirm.classList.add('bg-[#1e3a8a]', 'hover:bg-[#1f377a]');
             }
 
-            // Clonar para limpiar listeners
             const newModalConfirm = modalConfirm.cloneNode(true);
             modalConfirm.parentNode.replaceChild(newModalConfirm, modalConfirm);
             
@@ -366,12 +365,12 @@
             const confirmHandler = () => {
                 onConfirm();
                 modal.classList.add('hidden');
-                modalCancel.classList.remove('hidden'); // Ensure cancel button reappears for next usage
+                modalCancel.classList.remove('hidden');
             };
 
             const cancelHandler = () => {
                 modal.classList.add('hidden');
-                modalCancel.classList.remove('hidden'); // Ensure cancel button reappears for next usage
+                modalCancel.classList.remove('hidden');
             };
 
             newModalConfirm.addEventListener('click', confirmHandler);
@@ -380,8 +379,7 @@
             modal.classList.remove('hidden');
             document.getElementById('modalContent').focus();
         };
-        
-        // --- REGISTRO DE USUARIO (Actualizado para incluir username) ---
+
         window.showRegisterModal = () => {
             const modal = document.getElementById('customModal');
             const modalTitle = document.getElementById('modalTitle');
@@ -393,12 +391,11 @@
             const existingEmails = Object.keys(accounts);
             const otherAccountEmail = existingEmails.find(email => 
                 !window.currentUser || email !== window.currentUser.email
-            ) || "el segundo slot";
+            ) || "el otro slot disponible";
 
             modalTitle.textContent = 'Crear Nuevo Usuario';
             modalMessage.textContent = `Ingresa el nuevo nombre, correo y contraseña. Esto reemplazará al slot de usuario no logueado (${otherAccountEmail}). El dominio debe ser ${window.DOMAIN_REQUIRED}.`;
             
-            // Construir inputs CON NOMBRE DE USUARIO
             modalInputContainer.classList.remove('hidden');
             modalInputContainer.innerHTML = `
                 <input type="text" id="regUsername" placeholder="Nombre de Usuario (Obligatorio)" value=""
@@ -417,19 +414,17 @@
             `;
             
             modalConfirm.textContent = 'Registrar Cuenta';
-            // CLASES EN LÍNEA
             modalConfirm.classList.remove('bg-red-500', 'hover:bg-red-600', 'bg-[#1e3a8a]', 'hover:bg-[#1f377a]');
             modalConfirm.classList.add('bg-[#25D366]', 'hover:bg-[#128C7E]');
 
-            // Set up confirmation logic
             const confirmHandler = () => {
-                const newUsername = document.getElementById('regUsername').value.trim(); // Nuevo
+                const newUsername = document.getElementById('regUsername').value.trim();
                 const newEmail = document.getElementById('regEmail').value.toLowerCase().trim();
                 const newPassword = document.getElementById('regPassword').value;
                 const errorElement = document.getElementById('registerUserError');
                 errorElement.textContent = '';
                 
-                if (!newUsername) { // Nueva validación
+                if (!newUsername) {
                     errorElement.textContent = 'Error: El nombre de usuario es obligatorio.';
                     return;
                 }
@@ -443,11 +438,10 @@
                     return;
                 }
                 
-                window.registerUserLogic(newEmail, newPassword, newUsername); // Pasamos username
+                window.registerUserLogic(newEmail, newPassword, newUsername);
                 modal.classList.add('hidden');
             };
             
-            // Limpiar y re-adjuntar listeners
             const modalConfirmClone = document.getElementById('modalConfirm').cloneNode(true);
             document.getElementById('modalConfirm').parentNode.replaceChild(modalConfirmClone, document.getElementById('modalConfirm'));
             document.getElementById('modalConfirm').addEventListener('click', confirmHandler);
@@ -456,7 +450,7 @@
             modal.classList.remove('hidden');
         };
 
-        window.registerUserLogic = (newEmail, newPassword, newUsername) => { // Actualizado
+        window.registerUserLogic = (newEmail, newPassword, newUsername) => {
             let accounts = getAccounts();
             const existingEmails = Object.keys(accounts);
 
@@ -465,7 +459,6 @@
                  return;
             }
 
-            // Identificar el slot para reemplazar (la cuenta no logueada)
             const oldEmail = existingEmails.find(email => 
                 !window.currentUser || email !== window.currentUser.email
             );
@@ -475,7 +468,7 @@
                 return;
             }
             
-            // 1. Renombrar clave de contactos
+            // 1. Renombrar clave de contactos (si el usuario reemplazado tenía contactos)
             const oldContactsKey = getUserContactsKey(oldEmail);
             const newContactsKey = getUserContactsKey(newEmail);
             const contactsData = localStorage.getItem(oldContactsKey);
@@ -484,17 +477,18 @@
                 localStorage.setItem(newContactsKey, contactsData);
                 localStorage.removeItem(oldContactsKey);
                 console.log(`[STATUS] Clave de contactos renombrada de ${oldContactsKey} a ${newContactsKey}.`);
+            } else {
+                 // Si el usuario reemplazado no tenía contactos, el nuevo usuario empieza con lista vacía (como se espera)
+                 console.log(`[STATUS] El usuario reemplazado (${oldEmail}) no tenía clientes, el nuevo usuario (${newEmail}) inicia con lista vacía.`);
             }
 
             // 2. Actualizar el objeto de cuentas
             delete accounts[oldEmail];
-            accounts[newEmail] = { email: newEmail, password: newPassword, username: newUsername }; // Guardamos username
-            saveAccounts(accounts); // Esto llama a getAccounts() para imprimir en consola
+            accounts[newEmail] = { email: newEmail, password: newPassword, username: newUsername };
+            saveAccounts(accounts); 
 
             console.log(`[STATUS] ¡Nuevo usuario registrado! Usuario: ${newUsername}, Email: ${newEmail}. (Reemplazó a: ${oldEmail})`);
         };
-
-        // --- EDICIÓN DE USUARIO (Actualizado para incluir username) ---
 
         window.showEditUserModal = () => {
             if (!window.currentUser) return console.error('[ERROR] Debe iniciar sesión para editar.');
@@ -510,7 +504,6 @@
             modalTitle.textContent = 'Editar mi Cuenta';
             modalMessage.textContent = `Actualiza tus credenciales. El dominio debe ser ${window.DOMAIN_REQUIRED}. Todos tus clientes se mantendrán asociados.`;
             
-            // Construir inputs CON NOMBRE DE USUARIO
             modalInputContainer.classList.remove('hidden');
             modalInputContainer.innerHTML = `
                 <input type="text" id="editUsername" placeholder="Nombre de Usuario (Obligatorio)" value="${currentUsername}"
@@ -527,17 +520,14 @@
                 </div>
                 <p id="editUserError" class="text-center text-xs text-red-500"></p>
             `;
-            // Al abrir el modal, mostramos la contraseña por defecto (SOLICITADO)
             window.togglePasswordVisibility('editPassword', 'toggleEditPassword');
             
             modalConfirm.textContent = 'Guardar Cambios';
-            // CLASES EN LÍNEA
             modalConfirm.classList.remove('bg-red-500', 'hover:bg-red-600', 'bg-[#25D366]', 'hover:bg-[#128C7E]');
             modalConfirm.classList.add('bg-[#1e3a8a]', 'hover:bg-[#1f377a]');
 
-            // Set up confirmation logic
             const confirmHandler = () => {
-                const newUsername = document.getElementById('editUsername').value.trim(); // Nuevo
+                const newUsername = document.getElementById('editUsername').value.trim();
                 const newEmail = document.getElementById('editEmail').value.toLowerCase().trim();
                 const newPassword = document.getElementById('editPassword').value;
                 const errorElement = document.getElementById('editUserError');
@@ -557,12 +547,10 @@
                     return;
                 }
                 
-                // Proceed with update
-                window.updateUserCredentials(window.currentUser.email, newEmail, newPassword, newUsername); // Pasamos username
+                window.updateUserCredentials(window.currentUser.email, newEmail, newPassword, newUsername);
                 modal.classList.add('hidden');
             };
             
-            // Limpiar y re-adjuntar listeners
             const modalConfirmClone = document.getElementById('modalConfirm').cloneNode(true);
             document.getElementById('modalConfirm').parentNode.replaceChild(modalConfirmClone, document.getElementById('modalConfirm'));
             document.getElementById('modalConfirm').addEventListener('click', confirmHandler);
@@ -571,16 +559,15 @@
             modal.classList.remove('hidden');
         };
 
-        window.updateUserCredentials = (oldEmail, newEmail, newPassword, newUsername) => { // Actualizado
+        window.updateUserCredentials = (oldEmail, newEmail, newPassword, newUsername) => {
             let accounts = getAccounts(); 
             
-            // Check if the new email conflicts with the other user
             const otherUserEmail = Object.keys(accounts).find(key => key !== oldEmail);
             if (newEmail !== oldEmail && newEmail === otherUserEmail) {
                 return console.error('[ERROR] El nuevo correo ya está siendo utilizado por el otro usuario.');
             }
             
-            // 1. Renombrar clave de contactos en Local Storage si el email cambió
+            // 1. Renombrar clave de contactos en Local Storage si el email cambió (CRÍTICO para mantener datos aislados)
             if (oldEmail !== newEmail) {
                 const oldContactsKey = getUserContactsKey(oldEmail);
                 const newContactsKey = getUserContactsKey(newEmail);
@@ -589,7 +576,7 @@
                 if (contactsData) {
                     localStorage.setItem(newContactsKey, contactsData);
                     localStorage.removeItem(oldContactsKey);
-                    console.log(`[STATUS] Clave de contactos renombrada de ${oldContactsKey} a ${newContactsKey}.`);
+                    console.log(`%c[STATUS] Clave de contactos renombrada: Sus clientes ahora están bajo la clave ${newContactsKey}.`, 'color: orange;');
                 }
             }
 
@@ -597,34 +584,27 @@
             if (oldEmail !== newEmail) {
                 delete accounts[oldEmail];
             }
-            accounts[newEmail] = { email: newEmail, password: newPassword, username: newUsername }; // Guardamos username
-            saveAccounts(accounts); // Esto llama a getAccounts() para imprimir en consola
+            accounts[newEmail] = { email: newEmail, password: newPassword, username: newUsername };
+            saveAccounts(accounts);
             
             // 3. Log in con nuevas credenciales y re-renderizar
             window.handleUserLogin(accounts[newEmail]);
-            console.log(`[STATUS] ¡Credenciales actualizadas! Nuevo usuario: ${newUsername}, Nuevo correo: ${newEmail}. Los clientes se mantuvieron asociados.`);
+            console.log(`[STATUS] ¡Credenciales actualizadas! Nuevo usuario: ${newUsername}, Nuevo correo: ${newEmail}.`);
         };
 
 
         // --- AUTENTICACIÓN ---
         
-        // Esta función ahora solo garantiza el log de credenciales en consola
-        window.renderExistingUsers = () => {
-             getAccounts(); 
-        };
-
-
         window.handleUserLogin = (user) => {
             window.currentUser = user;
             localStorage.setItem(LS_KEY_CURRENT_USER, JSON.stringify(user));
 
             document.getElementById('authScreen').classList.add('hidden');
             document.getElementById('mainApp').classList.remove('hidden');
-            // Muestra el nombre de usuario en el mensaje de estado
-            document.getElementById('authStatus').textContent = `¡Hola, ${user.username || user.email}! Sesión iniciada como: ${user.email}`;
+            document.getElementById('authStatus').textContent = `¡Hola, ${user.username || user.email}! Sesión iniciada como: ${user.email} (Datos aislados)`;
             document.getElementById('authStatus').classList.remove('hidden');
             
-            console.log('[STATUS] Inicio de sesión exitoso. Cargando clientes...');
+            console.log('[STATUS] Inicio de sesión exitoso. Cargando clientes aislados...');
             loadContacts();
             window.cancelEdit();
         };
@@ -641,8 +621,7 @@
             console.log('[STATUS] Sesión cerrada. Inicia sesión para continuar.');
             document.getElementById('authMessage').textContent = '';
             
-            // Asegura que las credenciales se logueen en consola al cargar el login
-            renderExistingUsers(); 
+            getAccounts(); 
         };
 
         window.signIn = () => {
@@ -671,7 +650,7 @@
             window.handleUserLogout();
         };
         
-        // --- CRUD DE CONTACTOS (sin cambios de lógica) ---
+        // --- CRUD Y OTRAS FUNCIONES (Usan loadContacts/saveContacts que manejan la clave única) ---
 
         window.addOrUpdateContact = () => {
             if (!window.currentUser) return console.error('[ERROR] Debes iniciar sesión para guardar clientes.');
@@ -734,7 +713,7 @@
 
             window.showCustomConfirmation(
                 'Confirmar Eliminación',
-                `¿Estás seguro de que quieres eliminar a ${contactName} permanentemente?`, 
+                `¿Estás seguro de que quieres eliminar a ${contactName} permanentemente de TU lista?`, 
                 () => {
                     window.contacts = window.contacts.filter(c => c.phone !== phone);
                     saveContacts();
@@ -748,7 +727,7 @@
             if (!window.currentUser) return console.error('[ERROR] Debes iniciar sesión para limpiar clientes.');
             
             window.showCustomConfirmation(
-                '¡ALERTA! Eliminación Masiva',
+                '¡ALERTA! Eliminación Masiva Personal',
                 `Estás a punto de eliminar TUS ${window.contacts.length} clientes. ¿Deseas continuar?`, 
                 () => {
                     window.contacts = [];
@@ -758,8 +737,6 @@
                 }
             );
         };
-        
-        // --- FUNCIONES DE UI Y LÓGICA (sin cambios de lógica) ---
         
         window.toggleProjectInfoInput = () => {
             const category = document.getElementById('inputCategory').value;
@@ -776,14 +753,12 @@
             if (mode === 'edit' && contact) {
                 title.textContent = `Editando: ${contact.firstName} ${contact.lastName}`;
                 button.textContent = 'Guardar Cambios';
-                // CLASES EN LÍNEA
                 button.classList.remove('bg-[#25D366]');
                 button.classList.add('bg-[#4f46e5]');
                 cancelButton.classList.remove('hidden');
             } else { 
                 title.textContent = 'Agregar Nuevo Cliente';
                 button.textContent = 'Guardar Cliente';
-                // CLASES EN LÍNEA
                 button.classList.remove('bg-[#4f46e5]');
                 button.classList.add('bg-[#25D366]');
                 cancelButton.classList.add('hidden');
@@ -894,8 +869,6 @@
             });
         };
         
-        // --- DRAG AND DROP (sin cambios de lógica) ---
-        
         window.dragStart = (event, variable) => {
             event.dataTransfer.setData("text/plain", variable);
             event.currentTarget.classList.add('opacity-50');
@@ -937,12 +910,11 @@
             const messageTemplate = document.getElementById('messageTemplate').value.trim();
 
             if (!messageTemplate) {
-                // FIX: Usar showCustomConfirmation para alertar al usuario en la UI
                 window.showCustomConfirmation(
                     'Mensaje Faltante',
                     '¡Atención! Debes escribir el contenido del mensaje en el área de texto "Contenido del Mensaje" antes de intentar enviar.',
-                    () => {}, // No action needed on confirm
-                    false, // Not destructive
+                    () => {},
+                    false,
                     'Entendido'
                 );
                 return;
@@ -966,14 +938,12 @@
         // --- INICIALIZACIÓN ---
         
         const checkCurrentUser = () => {
-            // Esto asegura que los usuarios hardcodeados existen y se loguean en consola
             getAccounts(); 
             
             const userJson = localStorage.getItem(LS_KEY_CURRENT_USER);
             if (userJson) {
                 const user = JSON.parse(userJson);
                 const accounts = getAccounts();
-                // Verificación de credenciales con el nuevo campo username
                 if (accounts[user.email] && accounts[user.email].password === user.password) {
                      window.handleUserLogin(accounts[user.email]);
                 } else {
@@ -984,10 +954,10 @@
             }
         };
 
-        // Iniciar la comprobación al cargar la página
         checkCurrentUser();
 
     </script>
 
 </body>
 </html>
+
