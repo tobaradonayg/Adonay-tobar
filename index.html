@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WA Sender Profesional</title>
+    <!-- Carga de Tailwind CSS para estilos modernos y responsivos -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Configuración de fuente Inter */
+        body {
+            font-family: 'Inter', sans-serif;
+            transition: background-color 0.3s ease;
+        }
+        /* Estilos para cards y botones profesionales */
+        .card {
+            border: 1px solid #e5e7eb;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+        }
+        .contact-item:nth-child(even) {
+            background-color: #fafafa;
+        }
+        /* Clase para input de contraseña que deja espacio para el botón toggle */
+        .password-input-with-toggle {
+            padding-right: 6rem; /* 6rem = 24 tailwind units (pr-24) */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-4 md:p-8 min-h-screen">
+    
+    <!-- Custom Modal Structure -->
+    <div id="customModal" class="fixed inset-0 bg-gray-900 bg-opacity-80 z-50 flex items-center justify-center hidden transition-opacity duration-300">
+        <div id="modalContent" class="bg-white p-6 rounded-2xl shadow-2xl max-w-lg w-full space-y-5 transform transition-transform duration-300 scale-95 card">
+            <h3 id="modalTitle" class="text-2xl font-extrabold text-[#1e3a8a]"></h3>
+            <p id="modalMessage" class="text-gray-600 text-base"></p>
+            <div id="modalInputContainer" class="space-y-3 hidden">
+                <!-- Inputs for User Edit / Register -->
+            </div>
+            <div id="modalButtons" class="flex justify-end space-x-3 pt-3">
+                <button id="modalCancel" class="px-5 py-2 text-sm font-semibold rounded-xl bg-gray-200 text-gray-700 hover:bg-gray-300 transition">
+                    Cancelar
+                </button>
+                <button id="modalConfirm" class="px-5 py-2 text-sm font-semibold rounded-xl text-white transition">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP CONTAINER -->
+    <div class="max-w-7xl mx-auto w-full bg-white shadow-3xl rounded-3xl p-6 md:p-10 space-y-8 mt-4 card">
+        <header class="text-center space-y-1 mb-8 border-b pb-4">
+            <h1 class="text-5xl font-extrabold text-gray-900">
+                <span class="text-[#1e3a8a]">WA</span> Sender
+            </h1>
+            <p class="text-lg text-gray-500">
+                Herramienta de Gestión de Clientes y Mensajes (Modo Local)
+            </p>
+            <!-- Mensaje de estado de autenticación (mostrará el nombre de usuario) -->
+            <div id="authStatus" class="text-base font-semibold p-2 rounded-xl text-center bg-[#e0f2fe] text-[#1e3a8a] border border-[#1e3a8a] hidden mt-4"></div>
+        </header>
+
+        <!-- PANTALLA DE AUTENTICACIÓN -->
+        <div id="authScreen" class="max-w-md mx-auto space-y-6 p-6 bg-white rounded-2xl shadow-xl border border-gray-200">
+            <h2 class="text-2xl font-bold text-gray-800 text-center">Bienvenido, Inicia Sesión</h2>
+            
+            <input type="email" id="authEmail" placeholder="Correo (@galvanissa.com)"
+                   class="w-full p-4 border border-gray-300 rounded-xl focus:ring-[#1e3a8a] focus:border-[#1e3a8a] text-base transition" />
+            <input type="password" id="authPassword" placeholder="Contraseña (mínimo 6 caracteres)"
+                   class="w-full p-4 border border-gray-300 rounded-xl focus:ring-[#1e3a8a] focus:border-[#1e3a8a] text-base transition" />
+            
+            <button onclick="signIn()" 
+                    class="w-full p-4 rounded-xl bg-[#1e3a8a] text-white font-bold text-lg hover:bg-[#1f377a] transition duration-200 shadow-lg hover:shadow-xl">
+                Iniciar Sesión
+            </button>
+            <button onclick="showRegisterModal()" 
+                    class="w-full p-4 rounded-xl bg-gray-200 text-gray-800 font-bold text-lg hover:bg-gray-300 transition duration-200">
+                Registrarse (Crear Nuevo Usuario)
+            </button>
+            
+            <p id="authMessage" class="text-center text-sm text-red-500"></p>
+        </div>
+
+        <!-- PANTALLA PRINCIPAL DE LA APLICACIÓN (OCULTA POR DEFECTO) -->
+        <div id="mainApp" class="space-y-8 hidden">
+            
+            <!-- Botones de Perfil y Sesión -->
+            <div class="flex flex-col md:flex-row justify-end space-y-3 md:space-y-0 md:space-x-4">
+                <button onclick="showEditUserModal()" class="px-5 py-2 rounded-xl bg-[#4f46e5] text-white font-semibold text-sm hover:bg-[#4338ca] transition duration-200 shadow-md">
+                    Editar mi Cuenta
+                </button>
+                <button onclick="signOutUser()" class="px-5 py-2 rounded-xl bg-red-500 text-white font-semibold text-sm hover:bg-red-600 transition duration-200 shadow-md">
+                    Cerrar Sesión
+                </button>
+            </div>
+
+            <!-- CONTENEDOR PRINCIPAL: DIVIDIDO EN DOS COLUMNAS -->
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-8">
+
+                <!-- COLUMNA IZQUIERDA (CLIENTES): 2/5 del ancho -->
+                <div class="lg:col-span-2 space-y-6">
+                    <!-- GESTIÓN DE CONTACTOS (ADD / EDIT FORM) -->
+                    <div class="bg-white p-6 rounded-2xl space-y-4 shadow-xl border border-gray-100 card">
+                        <h2 id="formTitle" class="text-2xl font-bold text-gray-800 border-b pb-2">
+                            Agregar Nuevo Cliente
+                        </h2>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" id="inputFirstName" placeholder="Nombre (ej: Juan)"
+                                class="p-3 border border-gray-300 rounded-xl focus:ring-[#25D366] focus:border-[#25D366] text-sm" />
+                            <input type="text" id="inputLastName" placeholder="Apellido (ej: Pérez)"
+                                class="p-3 border border-gray-300 rounded-xl focus:ring-[#25D366] focus:border-[#25D366] text-sm" />
+                        </div>
+                        <input type="text" id="inputPhone" placeholder="Teléfono (+Código, ej: +52...)"
+                            class="w-full p-3 border border-gray-300 rounded-xl focus:ring-[#25D366] focus:border-[#25D366] text-sm" />
+
+                        <select id="inputCategory" onchange="toggleProjectInfoInput()"
+                            class="w-full p-3 border border-gray-300 rounded-xl focus:ring-[#25D366] focus:border-[#25D366] text-sm appearance-none bg-white">
+                            <option value="cartera">Clientes de Cartera</option>
+                            <option value="top">Clientes que Compran Más</option>
+                            <option value="occasional">Clientes De Vez en Cuando</option>
+                            <option value="recover">Clientes a Recuperar</option>
+                            <option value="project">Clientes de Proyectos</option>
+                        </select>
+                        
+                        <!-- Campo Condicional para Proyectos -->
+                        <textarea id="inputProjectInfo" placeholder="Información detallada del proyecto..." rows="2"
+                            class="w-full p-3 border border-gray-300 rounded-xl focus:ring-[#25D366] focus:border-[#25D366] text-sm hidden"></textarea>
+                        
+                        <div class="flex space-x-3">
+                            <button id="addEditButton" onclick="addOrUpdateContact()"
+                                class="w-full p-3 rounded-xl bg-[#25D366] text-white font-bold text-sm hover:bg-[#128C7E] transition duration-200 shadow-md">
+                                Guardar Cliente
+                            </button>
+                            <button id="cancelEditButton" onclick="cancelEdit()"
+                                class="hidden p-3 rounded-xl bg-gray-400 text-white font-bold text-sm hover:bg-gray-500 transition duration-200">
+                                Cancelar
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- LISTA DE CLIENTES FILTRO Y BÚSQUEDA -->
+                    <div class="bg-white p-6 rounded-2xl space-y-4 shadow-xl border border-gray-100 card">
+                        <h2 class="text-2xl font-bold text-gray-800 flex items-center justify-between border-b pb-2">
+                            Tu Lista de Clientes
+                            <button onclick="clearAllContacts()" class="text-xs text-red-500 hover:text-red-700 font-semibold p-1 rounded-lg">
+                                Limpiar Mis Clientes
+                            </button>
+                        </h2>
+
+                        <div class="grid grid-cols-2 gap-3">
+                            <input type="text" id="searchClient" oninput="filterAndSearchContacts()" placeholder="Buscar por Nombre/Apellido..."
+                                class="p-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-sm" />
+                            <select id="filterCategory" onchange="filterAndSearchContacts()"
+                                class="p-3 border border-gray-300 rounded-xl focus:ring-blue-500 focus:border-blue-500 text-sm appearance-none bg-white">
+                                <option value="all">Ver Todas</option>
+                                <option value="cartera">Cartera</option>
+                                <option value="top">Top Compradores</option>
+                                <option value="occasional">Ocasionales</option>
+                                <option value="recover">A Recuperar</option>
+                                <option value="project">Proyectos</option>
+                            </select>
+                        </div>
+
+                        <div id="contactList" class="h-80 overflow-y-auto bg-gray-50 border border-gray-300 rounded-xl text-sm">
+                            <!-- Los contactos filtrados se renderizan aquí -->
+                        </div>
+                        <p id="contactCount" class="text-xs text-gray-500 text-right font-medium"></p>
+                    </div>
+                </div>
+
+
+                <!-- COLUMNA DERECHA (MENSAJE): 3/5 del ancho -->
+                <div class="lg:col-span-3 space-y-6">
+                    
+                    <!-- DEFINIR MENSAJE Y ENVÍO -->
+                    <div class="bg-white p-6 rounded-2xl space-y-4 shadow-xl border border-gray-100 card">
+                        <h2 class="text-2xl font-bold text-gray-800 border-b pb-2">
+                            Definir Mensaje y Envío
+                        </h2>
+                        
+                        <!-- Draggable placeholders -->
+                        <label class="block text-sm font-semibold text-gray-700">
+                            Personalización: Arrastra y suelta estas variables en el área de texto.
+                        </label>
+                        <div class="flex flex-wrap gap-3 mb-2">
+                            <span draggable="true" ondragstart="dragStart(event, '{{firstName}}')"
+                                class="draggable-item bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1.5 rounded-full border-2 border-indigo-300 shadow-sm cursor-grab hover:bg-indigo-200 transition">
+                                {{Nombre}}
+                            </span>
+                            <span draggable="true" ondragstart="dragStart(event, '{{lastName}}')"
+                                class="draggable-item bg-indigo-100 text-indigo-800 text-xs font-bold px-3 py-1.5 rounded-full border-2 border-indigo-300 shadow-sm cursor-grab hover:bg-indigo-200 transition">
+                                {{Apellido}}
+                            </span>
+                        </div>
+
+                        <div>
+                            <label for="messageTemplate" class="block text-sm font-semibold text-gray-700 mb-2">
+                                Contenido del Mensaje
+                            </label>
+                            <textarea id="messageTemplate" placeholder="Hola {{firstName}}, te contacto por..." rows="10"
+                                ondragover="allowDrop(event)" ondrop="drop(event)"
+                                class="w-full p-4 border border-gray-300 rounded-xl focus:ring-[#1e3a8a] focus:border-[#1e3a8a] transition duration-150 text-sm"></textarea>
+                        </div>
+                        
+                        <p class="text-xs text-gray-500 italic pt-2">
+                            *El envío es individual. Presiona "Enviar WA" junto al cliente en la lista para personalizar y abrir el chat.
+                        </p>
+                    </div>
+
+                </div>
+
+            </div> <!-- END GRID -->
+        </div>
+    </div>
+
+    <script>
+        // --- CONSTANTES Y VARIABLES GLOBALES ---
+        const LS_KEY_ACCOUNTS = 'waSenderAccounts'; 
+        const LS_KEY_CURRENT_USER = 'waCurrentUser'; 
+        const LS_KEY_CONTACTS_PREFIX = 'waSenderContacts_'; 
+        // LÍMITE AUMENTADO A 200 CLIENTES POR USUARIO SEGÚN LA SOLICITUD
+        window.MAX_CONTACTS = 200;
+        window.DOMAIN_REQUIRED = '@galvanissa.com';
+        
+        // Usuarios predefinidos con el nuevo campo username
+        const INITIAL_ACCOUNTS_DATA = {
+            "usuario1@galvanissa.com": { email: "usuario1@galvanissa.com", password: "password1", username: "Gerente Ventas 1" },
+            "usuario2@galvanissa.com": { email: "usuario2@galvanissa.com", password: "password2", username: "Asesor Cliente 2" }
+        };
+
+        window.CATEGORY_MAP = {
+            cartera: 'Clientes de Cartera',
+            top: 'Clientes que Compran Más',
+            occasional: 'Clientes que Compran De Vez en Cuando',
+            recover: 'Clientes que Necesito Recuperar',
+            project: 'Clientes de Proyectos'
+        };
+
+        window.currentUser = null;
+        window.contacts = [];
+        window.editingDocId = null; 
+
+        // --- UTILIDADES DE LOCAL STORAGE ---
+
+        // Cargar todas las cuentas (o inicializarlas si no existen)
+        const getAccounts = () => {
+            const json = localStorage.getItem(LS_KEY_ACCOUNTS);
+            let accounts;
+            
+            if (!json) {
+                accounts = INITIAL_ACCOUNTS_DATA;
+                saveAccounts(accounts);
+            } else {
+                accounts = JSON.parse(json);
+                // Lógica de compatibilidad para cuentas antiguas sin 'username'
+                Object.keys(accounts).forEach(email => {
+                    if (!accounts[email].username) {
+                         accounts[email].username = accounts[email].email.split('@')[0];
+                    }
+                });
+            }
+            
+            // Imprimir CREDENCIALES COMPLETAS SOLO EN CONSOLA (SOLICITADO POR EL USUARIO)
+            console.groupCollapsed('%c[CREDENTIALES DE ACCESO ACTIVAS (CORREO, CONTRASEÑA Y USUARIO)]', 'color: #1e3a8a; font-size: 14px; font-weight: bold; background-color: #f0f8ff; padding: 5px; border-radius: 4px;');
+            Object.values(accounts).forEach(user => {
+                console.log(`Usuario: ${user.username} | Email: ${user.email} | Contraseña: ${user.password}`);
+            });
+            console.groupEnd();
+            
+            return accounts;
+        };
+
+        // Guardar todas las cuentas
+        const saveAccounts = (accounts) => {
+            localStorage.setItem(LS_KEY_ACCOUNTS, JSON.stringify(accounts));
+            // Aseguramos que la consola muestre siempre la lista de credenciales actualizadas
+            getAccounts(); 
+        };
+        
+        // Obtener la clave de contactos específica para el usuario
+        const getUserContactsKey = (email) => {
+            return LS_KEY_CONTACTS_PREFIX + email.toLowerCase();
+        };
+        
+        // Cargar contactos del usuario actual
+        const loadContacts = () => {
+            if (!window.currentUser) {
+                window.contacts = [];
+                return;
+            }
+            const key = getUserContactsKey(window.currentUser.email);
+            const json = localStorage.getItem(key);
+            const loadedContacts = json ? JSON.parse(json) : [];
+            window.contacts = loadedContacts;
+            console.log(`[STATUS] Se cargaron ${window.contacts.length} clientes para ${window.currentUser.email}.`);
+            window.filterAndSearchContacts();
+        };
+
+        // Guardar contactos del usuario actual
+        const saveContacts = () => {
+            if (!window.currentUser) return;
+            const key = getUserContactsKey(window.currentUser.email);
+            localStorage.setItem(key, JSON.stringify(window.contacts));
+        };
+        
+        // --- MANEJO DE MODALES ---
+        
+        // Función para alternar visibilidad de contraseña
+        window.togglePasswordVisibility = (passwordInputId, toggleButtonId) => {
+            const passwordInput = document.getElementById(passwordInputId);
+            const toggleButton = document.getElementById(toggleButtonId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                toggleButton.textContent = 'Ocultar';
+                toggleButton.classList.remove('bg-gray-200');
+                toggleButton.classList.add('bg-gray-300');
+            } else {
+                passwordInput.type = 'password';
+                toggleButton.textContent = 'Mostrar';
+                toggleButton.classList.remove('bg-gray-300');
+                toggleButton.classList.add('bg-gray-200');
+            }
+        };
+
+        window.showCustomConfirmation = (title, message, onConfirm, isDestructive = true, confirmText = 'Confirmar') => {
+            const modal = document.getElementById('customModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalConfirm = document.getElementById('modalConfirm');
+            const modalCancel = document.getElementById('modalCancel');
+            const modalInputContainer = document.getElementById('modalInputContainer');
+
+            modalInputContainer.innerHTML = '';
+            modalInputContainer.classList.add('hidden');
+            
+            modalTitle.textContent = title;
+            modalMessage.textContent = message;
+            
+            modalConfirm.textContent = confirmText;
+            
+            // CLASES EN LÍNEA
+            modalConfirm.classList.remove('bg-red-500', 'hover:bg-red-600', 'bg-[#1e3a8a]', 'hover:bg-[#1f377a]', 'bg-[#25D366]', 'hover:bg-[#128C7E]');
+            if (isDestructive) {
+                modalConfirm.classList.add('bg-red-500', 'hover:bg-red-600');
+            } else if (confirmText === 'Entendido') {
+                 // Use blue for informational messages
+                modalConfirm.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                modalCancel.classList.add('hidden');
+            } else {
+                modalConfirm.classList.add('bg-[#1e3a8a]', 'hover:bg-[#1f377a]');
+            }
+
+            // Clonar para limpiar listeners
+            const newModalConfirm = modalConfirm.cloneNode(true);
+            modalConfirm.parentNode.replaceChild(newModalConfirm, modalConfirm);
+            
+            const newModalCancel = modalCancel.cloneNode(true);
+            modalCancel.parentNode.replaceChild(newModalCancel, modalCancel);
+            
+            const confirmHandler = () => {
+                onConfirm();
+                modal.classList.add('hidden');
+                modalCancel.classList.remove('hidden'); // Ensure cancel button reappears for next usage
+            };
+
+            const cancelHandler = () => {
+                modal.classList.add('hidden');
+                modalCancel.classList.remove('hidden'); // Ensure cancel button reappears for next usage
+            };
+
+            newModalConfirm.addEventListener('click', confirmHandler);
+            newModalCancel.addEventListener('click', cancelHandler);
+
+            modal.classList.remove('hidden');
+            document.getElementById('modalContent').focus();
+        };
+        
+        // --- REGISTRO DE USUARIO (Actualizado para incluir username) ---
+        window.showRegisterModal = () => {
+            const modal = document.getElementById('customModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalConfirm = document.getElementById('modalConfirm');
+            const modalInputContainer = document.getElementById('modalInputContainer');
+            
+            const accounts = getAccounts();
+            const existingEmails = Object.keys(accounts);
+            const otherAccountEmail = existingEmails.find(email => 
+                !window.currentUser || email !== window.currentUser.email
+            ) || "el segundo slot";
+
+            modalTitle.textContent = 'Crear Nuevo Usuario';
+            modalMessage.textContent = `Ingresa el nuevo nombre, correo y contraseña. Esto reemplazará al slot de usuario no logueado (${otherAccountEmail}). El dominio debe ser ${window.DOMAIN_REQUIRED}.`;
+            
+            // Construir inputs CON NOMBRE DE USUARIO
+            modalInputContainer.classList.remove('hidden');
+            modalInputContainer.innerHTML = `
+                <input type="text" id="regUsername" placeholder="Nombre de Usuario (Obligatorio)" value=""
+                       class="w-full p-3 border border-gray-300 rounded-xl focus:ring-[#1e3a8a] focus:border-[#1e3a8a] text-sm" />
+                <input type="email" id="regEmail" placeholder="Nuevo Correo (ej: nuevo@galvanissa.com)" value=""
+                       class="w-full p-3 border border-gray-300 rounded-xl focus:ring-[#1e3a8a] focus:border-[#1e3a8a] text-sm" />
+                <div class="relative">
+                    <input type="password" id="regPassword" placeholder="Nueva Contraseña (mín. 6)" value=""
+                           class="w-full p-3 border border-gray-300 rounded-xl focus:ring-[#1e3a8a] focus:border-[#1e3a8a] text-sm password-input-with-toggle" />
+                    <button type="button" id="toggleRegPassword" onclick="togglePasswordVisibility('regPassword', 'toggleRegPassword')"
+                            class="absolute inset-y-0 right-0 my-1 mr-1 px-3 text-xs font-semibold rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition flex items-center justify-center">
+                        Mostrar
+                    </button>
+                </div>
+                <p id="registerUserError" class="text-center text-xs text-red-500"></p>
+            `;
+            
+            modalConfirm.textContent = 'Registrar Cuenta';
+            // CLASES EN LÍNEA
+            modalConfirm.classList.remove('bg-red-500', 'hover:bg-red-600', 'bg-[#1e3a8a]', 'hover:bg-[#1f377a]');
+            modalConfirm.classList.add('bg-[#25D366]', 'hover:bg-[#128C7E]');
+
+            // Set up confirmation logic
+            const confirmHandler = () => {
+                const newUsername = document.getElementById('regUsername').value.trim(); // Nuevo
+                const newEmail = document.getElementById('regEmail').value.toLowerCase().trim();
+                const newPassword = document.getElementById('regPassword').value;
+                const errorElement = document.getElementById('registerUserError');
+                errorElement.textContent = '';
+                
+                if (!newUsername) { // Nueva validación
+                    errorElement.textContent = 'Error: El nombre de usuario es obligatorio.';
+                    return;
+                }
+
+                if (!newEmail.endsWith(window.DOMAIN_REQUIRED)) {
+                    errorElement.textContent = `Error: El correo debe ser del dominio ${window.DOMAIN_REQUIRED}`;
+                    return;
+                }
+                if (newPassword.length < 6) {
+                    errorElement.textContent = 'Error: La contraseña debe tener al menos 6 caracteres.';
+                    return;
+                }
+                
+                window.registerUserLogic(newEmail, newPassword, newUsername); // Pasamos username
+                modal.classList.add('hidden');
+            };
+            
+            // Limpiar y re-adjuntar listeners
+            const modalConfirmClone = document.getElementById('modalConfirm').cloneNode(true);
+            document.getElementById('modalConfirm').parentNode.replaceChild(modalConfirmClone, document.getElementById('modalConfirm'));
+            document.getElementById('modalConfirm').addEventListener('click', confirmHandler);
+            document.getElementById('modalCancel').addEventListener('click', () => modal.classList.add('hidden'));
+
+            modal.classList.remove('hidden');
+        };
+
+        window.registerUserLogic = (newEmail, newPassword, newUsername) => { // Actualizado
+            let accounts = getAccounts();
+            const existingEmails = Object.keys(accounts);
+
+            if (existingEmails.includes(newEmail)) {
+                 console.error('[ERROR] El correo ya está registrado.');
+                 return;
+            }
+
+            // Identificar el slot para reemplazar (la cuenta no logueada)
+            const oldEmail = existingEmails.find(email => 
+                !window.currentUser || email !== window.currentUser.email
+            );
+            
+            if (!oldEmail) {
+                console.error('[ERROR] No se pudo determinar qué cuenta reemplazar. Esto no debería pasar.');
+                return;
+            }
+            
+            // 1. Renombrar clave de contactos
+            const oldContactsKey = getUserContactsKey(oldEmail);
+            const newContactsKey = getUserContactsKey(newEmail);
+            const contactsData = localStorage.getItem(oldContactsKey);
+
+            if (contactsData) {
+                localStorage.setItem(newContactsKey, contactsData);
+                localStorage.removeItem(oldContactsKey);
+                console.log(`[STATUS] Clave de contactos renombrada de ${oldContactsKey} a ${newContactsKey}.`);
+            }
+
+            // 2. Actualizar el objeto de cuentas
+            delete accounts[oldEmail];
+            accounts[newEmail] = { email: newEmail, password: newPassword, username: newUsername }; // Guardamos username
+            saveAccounts(accounts); // Esto llama a getAccounts() para imprimir en consola
+
+            console.log(`[STATUS] ¡Nuevo usuario registrado! Usuario: ${newUsername}, Email: ${newEmail}. (Reemplazó a: ${oldEmail})`);
+        };
+
+        // --- EDICIÓN DE USUARIO (Actualizado para incluir username) ---
+
+        window.showEditUserModal = () => {
+            if (!window.currentUser) return console.error('[ERROR] Debe iniciar sesión para editar.');
+            
+            const modal = document.getElementById('customModal');
+            const modalTitle = document.getElementById('modalTitle');
+            const modalMessage = document.getElementById('modalMessage');
+            const modalConfirm = document.getElementById('modalConfirm');
+            const modalInputContainer = document.getElementById('modalInputContainer');
+            
+            const currentUsername = window.currentUser.username || window.currentUser.email.split('@')[0];
+
+            modalTitle.textContent = 'Editar mi Cuenta';
+            modalMessage.textContent = `Actualiza tus credenciales. El dominio debe ser ${window.DOMAIN_REQUIRED}. Todos tus clientes se mantendrán asociados.`;
+            
+            // Construir inputs CON NOMBRE DE USUARIO
+            modalInputContainer.classList.remove('hidden');
+            modalInputContainer.innerHTML = `
+                <input type="text" id="editUsername" placeholder="Nombre de Usuario (Obligatorio)" value="${currentUsername}"
+                       class="w-full p-3 border border-gray-300 rounded-xl focus:ring-[#1e3a8a] focus:border-[#1e3a8a] text-sm" />
+                <input type="email" id="editEmail" placeholder="Nuevo Correo" value="${window.currentUser.email}"
+                       class="w-full p-3 border border-gray-300 rounded-xl focus:ring-[#1e3a8a] focus:border-[#1e3a8a] text-sm" />
+                <div class="relative">
+                    <input type="password" id="editPassword" placeholder="Nueva Contraseña (mín. 6)" value="${window.currentUser.password}"
+                           class="w-full p-3 border border-gray-300 rounded-xl focus:ring-[#1e3a8a] focus:border-[#1e3a8a] text-sm password-input-with-toggle" />
+                    <button type="button" id="toggleEditPassword" onclick="togglePasswordVisibility('editPassword', 'toggleEditPassword')"
+                            class="absolute inset-y-0 right-0 my-1 mr-1 px-3 text-xs font-semibold rounded-lg bg-gray-200 text-gray-700 hover:bg-gray-300 transition flex items-center justify-center">
+                        Mostrar
+                    </button>
+                </div>
+                <p id="editUserError" class="text-center text-xs text-red-500"></p>
+            `;
+            // Al abrir el modal, mostramos la contraseña por defecto (SOLICITADO)
+            window.togglePasswordVisibility('editPassword', 'toggleEditPassword');
+            
+            modalConfirm.textContent = 'Guardar Cambios';
+            // CLASES EN LÍNEA
+            modalConfirm.classList.remove('bg-red-500', 'hover:bg-red-600', 'bg-[#25D366]', 'hover:bg-[#128C7E]');
+            modalConfirm.classList.add('bg-[#1e3a8a]', 'hover:bg-[#1f377a]');
+
+            // Set up confirmation logic
+            const confirmHandler = () => {
+                const newUsername = document.getElementById('editUsername').value.trim(); // Nuevo
+                const newEmail = document.getElementById('editEmail').value.toLowerCase().trim();
+                const newPassword = document.getElementById('editPassword').value;
+                const errorElement = document.getElementById('editUserError');
+                errorElement.textContent = '';
+                
+                if (!newUsername) {
+                    errorElement.textContent = 'Error: El nombre de usuario es obligatorio.';
+                    return;
+                }
+
+                if (!newEmail.endsWith(window.DOMAIN_REQUIRED)) {
+                    errorElement.textContent = `El correo debe ser del dominio ${window.DOMAIN_REQUIRED}`;
+                    return;
+                }
+                if (newPassword.length < 6) {
+                    errorElement.textContent = 'La contraseña debe tener al menos 6 caracteres.';
+                    return;
+                }
+                
+                // Proceed with update
+                window.updateUserCredentials(window.currentUser.email, newEmail, newPassword, newUsername); // Pasamos username
+                modal.classList.add('hidden');
+            };
+            
+            // Limpiar y re-adjuntar listeners
+            const modalConfirmClone = document.getElementById('modalConfirm').cloneNode(true);
+            document.getElementById('modalConfirm').parentNode.replaceChild(modalConfirmClone, document.getElementById('modalConfirm'));
+            document.getElementById('modalConfirm').addEventListener('click', confirmHandler);
+            document.getElementById('modalCancel').addEventListener('click', () => modal.classList.add('hidden'));
+
+            modal.classList.remove('hidden');
+        };
+
+        window.updateUserCredentials = (oldEmail, newEmail, newPassword, newUsername) => { // Actualizado
+            let accounts = getAccounts(); 
+            
+            // Check if the new email conflicts with the other user
+            const otherUserEmail = Object.keys(accounts).find(key => key !== oldEmail);
+            if (newEmail !== oldEmail && newEmail === otherUserEmail) {
+                return console.error('[ERROR] El nuevo correo ya está siendo utilizado por el otro usuario.');
+            }
+            
+            // 1. Renombrar clave de contactos en Local Storage si el email cambió
+            if (oldEmail !== newEmail) {
+                const oldContactsKey = getUserContactsKey(oldEmail);
+                const newContactsKey = getUserContactsKey(newEmail);
+                const contactsData = localStorage.getItem(oldContactsKey);
+
+                if (contactsData) {
+                    localStorage.setItem(newContactsKey, contactsData);
+                    localStorage.removeItem(oldContactsKey);
+                    console.log(`[STATUS] Clave de contactos renombrada de ${oldContactsKey} a ${newContactsKey}.`);
+                }
+            }
+
+            // 2. Actualizar el objeto de cuentas
+            if (oldEmail !== newEmail) {
+                delete accounts[oldEmail];
+            }
+            accounts[newEmail] = { email: newEmail, password: newPassword, username: newUsername }; // Guardamos username
+            saveAccounts(accounts); // Esto llama a getAccounts() para imprimir en consola
+            
+            // 3. Log in con nuevas credenciales y re-renderizar
+            window.handleUserLogin(accounts[newEmail]);
+            console.log(`[STATUS] ¡Credenciales actualizadas! Nuevo usuario: ${newUsername}, Nuevo correo: ${newEmail}. Los clientes se mantuvieron asociados.`);
+        };
+
+
+        // --- AUTENTICACIÓN ---
+        
+        // Esta función ahora solo garantiza el log de credenciales en consola
+        window.renderExistingUsers = () => {
+             getAccounts(); 
+        };
+
+
+        window.handleUserLogin = (user) => {
+            window.currentUser = user;
+            localStorage.setItem(LS_KEY_CURRENT_USER, JSON.stringify(user));
+
+            document.getElementById('authScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            // Muestra el nombre de usuario en el mensaje de estado
+            document.getElementById('authStatus').textContent = `¡Hola, ${user.username || user.email}! Sesión iniciada como: ${user.email}`;
+            document.getElementById('authStatus').classList.remove('hidden');
+            
+            console.log('[STATUS] Inicio de sesión exitoso. Cargando clientes...');
+            loadContacts();
+            window.cancelEdit();
+        };
+
+        window.handleUserLogout = () => {
+            window.currentUser = null;
+            localStorage.removeItem(LS_KEY_CURRENT_USER);
+            
+            document.getElementById('authScreen').classList.remove('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('authStatus').classList.add('hidden');
+            window.contacts = [];
+            window.filterAndSearchContacts();
+            console.log('[STATUS] Sesión cerrada. Inicia sesión para continuar.');
+            document.getElementById('authMessage').textContent = '';
+            
+            // Asegura que las credenciales se logueen en consola al cargar el login
+            renderExistingUsers(); 
+        };
+
+        window.signIn = () => {
+            const email = document.getElementById('authEmail').value.toLowerCase();
+            const password = document.getElementById('authPassword').value;
+            const messageElement = document.getElementById('authMessage');
+            messageElement.textContent = '';
+
+            if (!email || !password) {
+                messageElement.textContent = 'Error: Correo y contraseña son obligatorios.';
+                return;
+            }
+
+            const accounts = getAccounts();
+            const user = accounts[email];
+
+            if (user && user.password === password) {
+                window.handleUserLogin(user);
+            } else {
+                console.error('[ERROR] Credenciales incorrectas o usuario no encontrado. Verifica la consola para ver los usuarios activos.');
+                messageElement.textContent = 'Error: Credenciales incorrectas o usuario no encontrado.';
+            }
+        };
+        
+        window.signOutUser = () => {
+            window.handleUserLogout();
+        };
+        
+        // --- CRUD DE CONTACTOS (sin cambios de lógica) ---
+
+        window.addOrUpdateContact = () => {
+            if (!window.currentUser) return console.error('[ERROR] Debes iniciar sesión para guardar clientes.');
+
+            const firstName = document.getElementById('inputFirstName').value.trim();
+            const lastName = document.getElementById('inputLastName').value.trim();
+            const phone = document.getElementById('inputPhone').value.trim();
+            const category = document.getElementById('inputCategory').value;
+            let projectInfo = category === 'project' ? document.getElementById('inputProjectInfo').value.trim() : '';
+            const cleanPhone = phone.replace(/[^0-9+]/g, '');
+
+            if (!firstName || !cleanPhone) {
+                return console.error('[ERROR] El Nombre y el Teléfono son obligatorios.');
+            }
+
+            if (!window.editingDocId && window.contacts.length >= window.MAX_CONTACTS) {
+                return console.error(`[ERROR] Se ha alcanzado el límite de ${window.MAX_CONTACTS} clientes.`);
+            }
+
+            const isDuplicate = window.contacts.some(c => c.phone === cleanPhone && c.docId !== window.editingDocId);
+            if (isDuplicate) {
+                return console.warn(`[ADVERTENCIA] El número ${cleanPhone} ya existe en tu lista.`);
+            }
+
+            const contactData = { 
+                firstName: firstName,
+                lastName: lastName,
+                phone: cleanPhone,
+                category: category,
+                projectInfo: projectInfo,
+                createdAt: new Date().toISOString()
+            };
+
+            if (window.editingDocId) {
+                const index = window.contacts.findIndex(c => c.docId === window.editingDocId);
+                if (index !== -1) {
+                    window.contacts[index] = { ...contactData, docId: window.editingDocId };
+                    console.log(`[STATUS] Cliente Editado: ${firstName} ${lastName}`);
+                }
+            } else {
+                const newDocId = Date.now().toString(36) + Math.random().toString(36).substring(2);
+                window.contacts.push({ ...contactData, docId: newDocId });
+                console.log(`[STATUS] Cliente Guardado: ${firstName} ${lastName}`);
+            }
+
+            saveContacts();
+            loadContacts();
+            window.cancelEdit();
+        };
+
+        window.deleteContactByPhone = (phone) => {
+            if (!window.currentUser) return console.error('[ERROR] Debes iniciar sesión para eliminar clientes.');
+            
+            const contact = window.contacts.find(c => c.phone === phone);
+            if (!contact) {
+                return console.error(`[ERROR] Cliente con teléfono ${phone} no encontrado.`);
+            }
+            
+            const contactName = `${contact.firstName} ${contact.lastName}`;
+
+            window.showCustomConfirmation(
+                'Confirmar Eliminación',
+                `¿Estás seguro de que quieres eliminar a ${contactName} permanentemente?`, 
+                () => {
+                    window.contacts = window.contacts.filter(c => c.phone !== phone);
+                    saveContacts();
+                    loadContacts();
+                    console.log(`[STATUS] Cliente eliminado: ${contactName}`);
+                }
+            );
+        };
+
+        window.clearAllContacts = () => {
+            if (!window.currentUser) return console.error('[ERROR] Debes iniciar sesión para limpiar clientes.');
+            
+            window.showCustomConfirmation(
+                '¡ALERTA! Eliminación Masiva',
+                `Estás a punto de eliminar TUS ${window.contacts.length} clientes. ¿Deseas continuar?`, 
+                () => {
+                    window.contacts = [];
+                    saveContacts();
+                    loadContacts();
+                    console.log('[STATUS] ¡Todos tus clientes han sido eliminados!');
+                }
+            );
+        };
+        
+        // --- FUNCIONES DE UI Y LÓGICA (sin cambios de lógica) ---
+        
+        window.toggleProjectInfoInput = () => {
+            const category = document.getElementById('inputCategory').value;
+            const projectInfoInput = document.getElementById('inputProjectInfo');
+            projectInfoInput.classList.toggle('hidden', category !== 'project');
+        };
+
+        window.setFormMode = (mode, contact = null) => {
+            window.editingDocId = contact ? contact.docId : null;
+            const title = document.getElementById('formTitle');
+            const button = document.getElementById('addEditButton');
+            const cancelButton = document.getElementById('cancelEditButton');
+
+            if (mode === 'edit' && contact) {
+                title.textContent = `Editando: ${contact.firstName} ${contact.lastName}`;
+                button.textContent = 'Guardar Cambios';
+                // CLASES EN LÍNEA
+                button.classList.remove('bg-[#25D366]');
+                button.classList.add('bg-[#4f46e5]');
+                cancelButton.classList.remove('hidden');
+            } else { 
+                title.textContent = 'Agregar Nuevo Cliente';
+                button.textContent = 'Guardar Cliente';
+                // CLASES EN LÍNEA
+                button.classList.remove('bg-[#4f46e5]');
+                button.classList.add('bg-[#25D366]');
+                cancelButton.classList.add('hidden');
+                document.getElementById('inputFirstName').value = '';
+                document.getElementById('inputLastName').value = '';
+                document.getElementById('inputPhone').value = '';
+                document.getElementById('inputCategory').value = 'cartera';
+                document.getElementById('inputProjectInfo').value = '';
+                window.toggleProjectInfoInput();
+            }
+        };
+
+        window.startEditByPhone = (phone) => {
+            const contact = window.contacts.find(c => c.phone === phone);
+            if (contact) {
+                document.getElementById('inputFirstName').value = contact.firstName;
+                document.getElementById('inputLastName').value = contact.lastName;
+                document.getElementById('inputPhone').value = contact.phone;
+                document.getElementById('inputCategory').value = contact.category;
+                document.getElementById('inputProjectInfo').value = contact.projectInfo || '';
+
+                window.toggleProjectInfoInput();
+                window.setFormMode('edit', contact);
+            } else {
+                console.error(`[ERROR] Cliente con teléfono ${phone} no encontrado.`);
+            }
+        };
+
+        window.cancelEdit = () => {
+            window.setFormMode('add');
+        };
+
+        window.filterAndSearchContacts = () => {
+            const searchClient = document.getElementById('searchClient');
+            const filterCategory = document.getElementById('filterCategory');
+            if (!searchClient || !filterCategory) return;
+            
+            const searchTerm = searchClient.value.toLowerCase().trim();
+            const filterValue = filterCategory.value;
+            
+            let filteredContacts = window.contacts;
+
+            if (filterValue !== 'all') {
+                filteredContacts = filteredContacts.filter(c => c.category === filterValue);
+            }
+
+            if (searchTerm) {
+                filteredContacts = filteredContacts.filter(c => 
+                    c.firstName.toLowerCase().includes(searchTerm) || 
+                    c.lastName.toLowerCase().includes(searchTerm) ||
+                    c.phone.includes(searchTerm)
+                );
+            }
+
+            window.renderFilteredContacts(filteredContacts);
+        };
+
+        window.renderFilteredContacts = (filteredContacts) => {
+            const listContainer = document.getElementById('contactList');
+            const countElement = document.getElementById('contactCount');
+            if (!listContainer || !countElement) return;
+
+            listContainer.innerHTML = '';
+            
+            countElement.textContent = `Mostrando ${filteredContacts.length} de ${window.contacts.length} clientes (Máx: ${window.MAX_CONTACTS})`;
+
+            if (filteredContacts.length === 0) {
+                listContainer.innerHTML = '<p class="text-gray-500 italic p-4 text-center">No hay clientes que coincidan con los filtros o tu lista está vacía.</p>';
+                return;
+            }
+
+            filteredContacts.forEach((contact) => {
+                const phoneForAction = contact.phone; 
+                const fullName = `${contact.firstName} ${contact.lastName}`;
+                const categoryLabel = window.CATEGORY_MAP[contact.category] || contact.category;
+                const projectDisplay = contact.category === 'project' && contact.projectInfo
+                    ? `<span class="text-xs text-orange-600 italic font-medium truncate ml-2">${contact.projectInfo.substring(0, 30)}...</span>`
+                    : '';
+
+                const item = document.createElement('div');
+                item.className = 'contact-item flex flex-col md:flex-row justify-between items-start md:items-center p-3 border-b border-gray-200 last:border-b-0 hover:bg-gray-100 transition';
+                item.innerHTML = `
+                    <div class="flex flex-col flex-grow min-w-0 pr-2 pb-1 md:pb-0">
+                        <div class="font-bold truncate text-gray-900 flex items-center">
+                            ${fullName} ${projectDisplay}
+                        </div>
+                        <div class="text-xs text-gray-600 font-medium flex items-center space-x-2">
+                             <span>${categoryLabel}</span>
+                             <span class="text-blue-600 font-bold">${contact.phone}</span>
+                        </div>
+                    </div>
+                    <div class="flex space-x-2 flex-shrink-0 pt-2 md:pt-0">
+                        <button onclick="sendSingleContactByPhone('${phoneForAction}')" 
+                                class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-[#25D366] text-white hover:bg-[#128C7E] transition shadow-md">
+                            Enviar WA
+                        </button>
+                        <button onclick="startEditByPhone('${phoneForAction}')" 
+                                class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-yellow-400 text-yellow-900 hover:bg-yellow-500 transition shadow-md">
+                            Editar
+                        </button>
+                        <button onclick="deleteContactByPhone('${phoneForAction}')" 
+                                class="text-xs font-semibold px-3 py-1.5 rounded-xl bg-red-100 text-red-600 hover:bg-red-200 transition shadow-md">
+                            Eliminar
+                        </button>
+                    </div>
+                `;
+                listContainer.appendChild(item);
+            });
+        };
+        
+        // --- DRAG AND DROP (sin cambios de lógica) ---
+        
+        window.dragStart = (event, variable) => {
+            event.dataTransfer.setData("text/plain", variable);
+            event.currentTarget.classList.add('opacity-50');
+        };
+        
+        document.addEventListener('dragend', (event) => {
+            if (event.target.classList.contains('draggable-item')) {
+                event.target.classList.remove('opacity-50');
+            }
+        });
+
+        window.allowDrop = (event) => {
+            event.preventDefault();
+        };
+
+        window.drop = (event) => {
+            event.preventDefault();
+            const variable = event.dataTransfer.getData("text/plain");
+            const textarea = document.getElementById('messageTemplate');
+            const start = textarea.selectionStart;
+            const end = textarea.selectionEnd;
+
+            const text = textarea.value;
+            const newText = text.substring(0, start) + variable + text.substring(end);
+
+            textarea.value = newText;
+            
+            textarea.selectionStart = textarea.selectionEnd = start + variable.length;
+        };
+
+        window.sendSingleContactByPhone = (phone) => {
+            const contact = window.contacts.find(c => c.phone === phone);
+            
+            if (!contact) {
+                console.error(`[ERROR] Cliente con teléfono ${phone} no encontrado.`);
+                return;
+            }
+
+            const messageTemplate = document.getElementById('messageTemplate').value.trim();
+
+            if (!messageTemplate) {
+                // FIX: Usar showCustomConfirmation para alertar al usuario en la UI
+                window.showCustomConfirmation(
+                    'Mensaje Faltante',
+                    '¡Atención! Debes escribir el contenido del mensaje en el área de texto "Contenido del Mensaje" antes de intentar enviar.',
+                    () => {}, // No action needed on confirm
+                    false, // Not destructive
+                    'Entendido'
+                );
+                return;
+            }
+
+            // Personalización
+            let personalizedMessage = messageTemplate;
+            personalizedMessage = personalizedMessage.replace(/{{firstName}}/g, contact.firstName);
+            personalizedMessage = personalizedMessage.replace(/{{lastName}}/g, contact.lastName);
+            personalizedMessage = personalizedMessage.trim();
+
+            const waLink = `https://web.whatsapp.com/send?phone=${contact.phone}&text=${encodeURIComponent(personalizedMessage)}`;
+            
+            console.log(`[ENVÍO] Abriendo chat para ${contact.firstName} (${contact.phone})...`);
+
+            window.open(waLink, '_blank');
+            
+            console.log(`[ENVÍO] ✅ Chat abierto. Recuerda hacer clic en 'Enviar' manualmente en la nueva pestaña.`);
+        };
+        
+        // --- INICIALIZACIÓN ---
+        
+        const checkCurrentUser = () => {
+            // Esto asegura que los usuarios hardcodeados existen y se loguean en consola
+            getAccounts(); 
+            
+            const userJson = localStorage.getItem(LS_KEY_CURRENT_USER);
+            if (userJson) {
+                const user = JSON.parse(userJson);
+                const accounts = getAccounts();
+                // Verificación de credenciales con el nuevo campo username
+                if (accounts[user.email] && accounts[user.email].password === user.password) {
+                     window.handleUserLogin(accounts[user.email]);
+                } else {
+                    window.handleUserLogout();
+                }
+            } else {
+                window.handleUserLogout();
+            }
+        };
+
+        // Iniciar la comprobación al cargar la página
+        checkCurrentUser();
+
+    </script>
+
+</body>
+</html>
